@@ -21,13 +21,13 @@
     }
     public class Scheduler : IDisposable
     {
-        private BackgroundTask _task;
-        private PriorityQueue<Action<CancellationToken>, Priority> _queue;
         private object _lock;
-        private ManualResetEvent _manualResetEvent;
         private State _state;
+        private BackgroundTask _task;
+        private ManualResetEvent _manualResetEvent;
+        private PriorityQueue<Action<CancellationToken>, Priority> _queue;
 
-        public event EventHandler Stopped;
+        public event EventHandler? Stopped;
         
         public State State 
         { 
