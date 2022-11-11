@@ -7,6 +7,8 @@
         private Thread? _thread;
         private CancellationTokenSource? _tokenSource;
 
+        public bool IsAlive => _thread?.IsAlive ?? false;
+
         public BackgroundTask(Action<CancellationToken> method, string name = $"{nameof(Scheduler)}.{nameof(BackgroundTask)}")
         {
             _method = method;
@@ -20,7 +22,7 @@
 
         public bool Start(ThreadPriority priority = ThreadPriority.Normal)
         {
-            if (_thread?.IsAlive ?? false) return false;
+            if (IsAlive) return false;
             _tokenSource = new CancellationTokenSource();    
             _thread = new Thread(() => _method(_tokenSource.Token)) { IsBackground = true, Priority = priority, Name = _name };
             _thread.Start();
