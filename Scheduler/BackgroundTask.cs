@@ -2,26 +2,39 @@
 {
     public class BackgroundTask : IDisposable
     {
+        private Action<CancellationToken> _method;
+        private string _name;
+        private Thread? _thread;
+        private CancellationTokenSource? _tokenSource;
 
-        public BackgroundTask(string name = $"{nameof(Scheduler)}.{nameof(BackgroundTask)}")
+        public BackgroundTask(Action<CancellationToken> method, string name = $"{nameof(Scheduler)}.{nameof(BackgroundTask)}")
         {
-
+            _method = method;
+            _name = name;
         }
 
         public void Dispose()
         {
-            throw new NotImplementedException();
+            Stop();
         }
 
-        public bool Start()
+        public bool Start(ThreadPriority priority = ThreadPriority.Normal)
         {
-            throw new NotImplementedException();
+            if (_thread?.IsAlive ?? false) return false;
+            _tokenSource = new CancellationTokenSource();    
+            _thread = new Thread(() => _method(_tokenSource.Token)) { IsBackground = true, Priority = priority, Name = _name };
+            _thread.Start();
+            return true;
         }
 
-        public bool Stop()
+        public void Stop()
         {
-            throw new NotImplementedException();
+            _tokenSource?.Cancel();
+            _thread?.Join();
+            _tokenSource?.Dispose();
 
+            _tokenSource = null;
+            _thread = null;
         }
     }
 }

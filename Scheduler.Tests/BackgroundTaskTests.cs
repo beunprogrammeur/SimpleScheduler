@@ -4,32 +4,48 @@ namespace Scheduler.Tests
     [TestClass]
     public class BackgroundTaskTests
     {
-        [TestMethod]
+        [TestMethod, Timeout(50)]
         public void CanRunBackgroundTaskTest()
         {
-            Assert.Fail();
+            using var mre = new ManualResetEvent(false);
+            using var task = new BackgroundTask(token => {
+                mre.Set();
+            });
 
+            task.Start();
+            mre.WaitOne();
         }
 
-        [TestMethod]
+        [TestMethod, Timeout(50)]
         public void CanCancelBackgroundTaskTest()
         {
-            Assert.Fail();
+            // cancels on dispose
+            using var task = new BackgroundTask(token =>
+            {
+                token.Wait(1000);
+            });
 
+            task.Start();
         }
 
         [TestMethod]
         public void StartingTaskThatIsAlreadyStartedDoesntInterfereTest()
         {
-            Assert.Fail();
+            using var task = new BackgroundTask(token => token.Wait(1000));
+            var first  = task.Start();
+            var second = task.Start();
 
+            Assert.IsTrue(first);
+            Assert.IsFalse(second);
         }
 
         [TestMethod]
         public void StoppingStoppedTaskDoesntThrowTest()
         {
-            Assert.Fail();
-
+            using var task = new BackgroundTask(token => token.Wait(1000));
+            task.Start();
+            task.Stop();
+            task.Stop();
         }
     }
 }
